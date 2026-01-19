@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Clientes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 1.8rem;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-edit {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+        }
+
+        .btn-edit:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .card {
+            background-color: var(--surface);
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: var(--surface-hover);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal.open {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal.open .modal-content {
+            transform: scale(1);
+        }
+
+        .modal h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: white;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--text-muted);
+        }
+
+        .btn-cancel:hover {
+            color: white;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(100px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 200;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+
+        .toast-success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast-error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Gestión de Clientes</h1>
+            <button class="btn" onclick="openModal()">
+                <span>+</span> Nuevo Cliente
+            </button>
+        </header>
+
+        <div class="card">
+            <div id="loading" class="loading">Cargando...</div>
+            <table id="clientTable">
+                <thead>
+                    <tr>
+                        <th width="50">ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th width="150">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="clientList">
+                    <!-- Clientes aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Nuevo Cliente</h2>
+            <form id="clientForm" onsubmit="handleSave(event)">
+                <input type="hidden" id="clientId">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="nombre" name="nombre" required placeholder="Ej. Juan Pérez">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" name="email" required placeholder="juan@ejemplo.com">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <span id="toastMsg">Mensaje</span>
+    </div>
+
+    <script>
+        const API_URL = 'clientes/';
+        let clients = [];
+
+        // DOM Elements
+        const listEl = document.getElementById('clientList');
+        const modal = document.getElementById('modal');
+        const form = document.getElementById('clientForm');
+        const loadingEl = document.getElementById('loading');
+
+        // Init
+        document.addEventListener('DOMContentLoaded', loadClients);
+
+        async function loadClients() {
+            loadingEl.style.display = 'block';
+            listEl.innerHTML = '';
+
+            try {
+                // Fetch with cache busting
+                const res = await fetch(`${API_URL}seleccionar.php?t=${Date.now()}`);
+
+                if (res.status === 204) {
+                    clients = [];
+                } else if (res.ok) {
+                    const data = await res.json();
+                    clients = data.records || [];
+                } else {
+                    // Manejo básico de error
+                    clients = [];
+                    showToast('Error cargando clientes', 'error');
+                }
+
+                render();
+            } catch (error) {
+                console.error(error);
+                showToast('Error de conexión', 'error');
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        function render() {
+            if (clients.length === 0) {
+                listEl.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem; color: var(--text-muted)">No hay clientes registrados.</td></tr>';
+                return;
+            }
+
+            listEl.innerHTML = clients.map(c => `
+                <tr>
+                    <td>#${c.id}</td>
+                    <td>${escapeHtml(c.nombre)}</td>
+                    <td>${escapeHtml(c.email)}</td>
+                    <td>
+                        <button class="btn btn-edit" onclick="openModal(${c.id})">Editar</button>
+                        <button class="btn btn-danger" onclick="deleteClient(${c.id})">Borrar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openModal(id = null) {
+            form.reset();
+            if (id) {
+                const client = clients.find(c => c.id == id);
+                document.getElementById('clientId').value = client.id;
+                document.getElementById('nombre').value = client.nombre;
+                document.getElementById('email').value = client.email;
+                document.getElementById('modalTitle').textContent = 'Editar Cliente';
+            } else {
+                document.getElementById('clientId').value = '';
+                document.getElementById('modalTitle').textContent = 'Nuevo Cliente';
+            }
+            modal.classList.add('open');
+            document.getElementById('nombre').focus();
+        }
+
+        function closeModal() {
+            modal.classList.remove('open');
+        }
+
+        async function handleSave(e) {
+            e.preventDefault();
+            const id = document.getElementById('clientId').value;
+            const formData = new FormData(form);
+
+            // Determinar si es crear o editar
+            const url = id ? `${API_URL}editar.php?id=${id}` : `${API_URL}nuevo.php`;
+
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok || res.status === 201) {
+                    showToast(id ? 'Cliente actualizado' : 'Cliente creado', 'success');
+                    closeModal();
+                    loadClients();
+                } else {
+                    const data = await res.json();
+                    showToast(data.message || 'Error al guardar', 'error');
+                }
+            } catch (error) {
+                showToast('Error de conexión', 'error');
+            }
+        }
+
+        async function deleteClient(id) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este cliente?')) return;
+
+            try {
+                const res = await fetch(`${API_URL}borrar.php?id=${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    showToast('Cliente eliminado', 'success');
+                    loadClients();
+                } else {
+                    const data = await res.json();
+                    showToast(data.message || 'Error al borrar', 'error');
+                }
+            } catch (error) {
+                showToast('Error de conexión', 'error');
+            }
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.className = `toast toast-${type} show`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+        }
+    </script>
+</body>
+
+</html>
